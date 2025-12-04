@@ -1,46 +1,26 @@
-x-environment: &env
-  NODE_ENV: "production"
-  DB_HOSTNAME: immich_postgres_2
-  DB_USERNAME: "postgres"
-  DB_PASSWORD: "immich1234"
-  DB_DATABASE_NAME: "immich"
-  REDIS_HOSTNAME: "immich_redis_2"
-  LOG_LEVEL: "log"
-  JWT_SECRET: "meinJWTSecret123"
-  DISABLE_REVERSE_GEOCODING: "false"
-  REVERSE_GEOCODING_PRECISION: "3"
-  PUBLIC_LOGIN_PAGE_MESSAGE: ""
-  IMMICH_MACHINE_LEARNING_URL: "http://immich_machine_learning_2:3003"
-
 services:
   immich_server_2:
     image: ghcr.io/immich-app/immich-server:v2.3.1
-    command: ["start-api"]
     ports:
       - "2284:2283"
     volumes:
       - ./data/upload:/data
     environment:
-      <<: *env
+      DB_HOSTNAME: immich_postgres_2
+      DB_USERNAME: postgres
+      DB_PASSWORD: immich1234
+      DB_DATABASE_NAME: immich
+      REDIS_HOSTNAME: immich_redis_2
+      LOG_LEVEL: log
+      JWT_SECRET: meinJWTSecret123
+      DISABLE_REVERSE_GEOCODING: "false"
+      REVERSE_GEOCODING_PRECISION: "3"
+      PUBLIC_LOGIN_PAGE_MESSAGE: ""
+      IMMICH_MACHINE_LEARNING_URL: "http://immich_machine_learning_2:3003"
     depends_on:
       - immich_redis_2
       - immich_postgres_2
     restart: on-failure
-
-  immich_machine_learning_2:
-    image: ghcr.io/immich-app/immich-machine-learning:v2.3.1
-    command: ["start-ml"]
-    volumes:
-      - ./data/model-cache:/cache
-    environment:
-      <<: *env
-    restart: on-failure
-
-  immich_redis_2:
-    image: redis:6
-    restart: on-failure
-    volumes:
-      - ./data/redis:/data
 
   immich_postgres_2:
     image: ghcr.io/immich-app/postgres:14
@@ -50,4 +30,10 @@ services:
       POSTGRES_DB: immich
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
+    restart: on-failure
+
+  immich_redis_2:
+    image: redis:6
+    volumes:
+      - ./data/redis:/data
     restart: on-failure
